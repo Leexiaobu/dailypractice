@@ -2,12 +2,12 @@ package cn.lwjzt.dailypractice._20201209;
 
 public class Singleton {
 
-
     public static Singleton getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
     private static class SingletonHolder {
+
         private static final Singleton INSTANCE = new Singleton();
     }
 

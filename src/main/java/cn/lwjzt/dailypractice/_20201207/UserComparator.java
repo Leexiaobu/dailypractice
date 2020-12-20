@@ -3,7 +3,6 @@ package cn.lwjzt.dailypractice._20201207;
 import java.util.Comparator;
 
 public class UserComparator implements Comparator<User> {
-
     @Override
     public int compare(User o1, User o2) {
         if (o1.age .equals(o2.age) ) {

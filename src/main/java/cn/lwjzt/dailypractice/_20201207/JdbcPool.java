@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 public class JdbcPool {
+    /**
+     * key:线程 Value:存储的Connection
+     */
     Map<Thread, Connection> map = new HashMap<>();
     static final String DRIVER_NAME = "com.mysql.cj.jdbc.Driver";
     static final String URL = "jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai";
@@ -14,16 +17,15 @@ public class JdbcPool {
     Integer poolSize;
     ThreadPoolExecutor poolExecutor;
     public JdbcPool(Integer poolSize) {
-        this.poolExecutor = new ThreadPoolExecutor(poolSize, poolSize, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+        this.poolExecutor = new ThreadPoolExecutor(poolSize, poolSize,
+            10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
         this.poolSize = poolSize;
     }
     public void close() {
         this.poolExecutor.shutdown();
     }
-
-
     Connection getConnection(Thread thread) throws SQLException, ClassNotFoundException {
-        /*防止Connection被关闭*/
+        /*防止Connection被关闭,所有这里判断下是否为null*/
         if (map.containsKey(thread) && map.get(thread) != null) {
             return map.get(thread);
         } else {
@@ -33,7 +35,6 @@ public class JdbcPool {
             return con;
         }
     }
-
     public Connection getConnection() throws ExecutionException, InterruptedException {
         Future<Connection> submit = poolExecutor.submit(() -> getConnection(Thread.currentThread()));
         return submit.get();
@@ -46,9 +47,7 @@ public class JdbcPool {
                 try {
                     Connection connection = jdbcPool.getConnection();
                     System.out.println(Thread.currentThread().getName() + ":" + connection);
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }).start();
